@@ -1,0 +1,270 @@
+{
+  "name": "Reymen Analytics — Portfolio Tracker (Twilio + Claude + Google Sheets)",
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Portfolio Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 300],
+      "webhookId": "reymen-portfolio",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "portfolio",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Has Image?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": false, "leftValue": "", "typeValidation": "loose"},
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ parseInt($json.body.NumMedia || '0') }}",
+              "rightValue": 0,
+              "operator": {"type": "number", "operation": "gt"}
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Download Portfolio Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 180],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.body.MediaUrl0 }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "responseFormat": "file",
+        "options": {}
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_WITH_TWILIO_CRED_ID",
+          "name": "Twilio Basic Auth"
+        }
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Prepare Base64",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 180],
+      "parameters": {
+        "jsCode": "const binary = $input.item.binary;\nconst binaryKey = Object.keys(binary)[0];\nconst img = binary[binaryKey];\nconst webhookBody = $('Portfolio Webhook').item.json.body;\n\nreturn [{\n  json: {\n    imageBase64: img.data,\n    mimeType: img.mimeType || 'image/jpeg',\n    fromNumber: webhookBody.From,\n    toNumber: webhookBody.To\n  }\n}];"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Claude Vision — Extract Portfolio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 180],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "x-api-key", "value": "={{ $vars.ANTHROPIC_API_KEY }}"},
+            {"name": "anthropic-version", "value": "2023-06-01"},
+            {"name": "content-type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({\n  model: 'claude-haiku-4-5-20251001',\n  max_tokens: 2000,\n  messages: [{\n    role: 'user',\n    content: [\n      {\n        type: 'image',\n        source: {\n          type: 'base64',\n          media_type: $json.mimeType,\n          data: $json.imageBase64\n        }\n      },\n      {\n        type: 'text',\n        text: 'Extract all stock positions from this portfolio screenshot.\\nReturn ONLY valid JSON array, no markdown, no explanation:\\n[{\\\"ticker\\\":\\\"AAPL\\\",\\\"company\\\":\\\"Apple Inc.\\\",\\\"shares\\\":10,\\\"avg_cost\\\":150.00,\\\"current_price\\\":185.00,\\\"market_value\\\":1850.00,\\\"gain_loss\\\":350.00,\\\"gain_loss_pct\\\":23.33}]\\nSet any missing field to null. Include every visible position.'\n      }\n    ]\n  }]\n}) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Parse & Build Sheet Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 180],
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst today = new Date().toISOString().split('T')[0];\nconst fromNumber = $('Prepare Base64').item.json.fromNumber;\nconst toNumber = $('Prepare Base64').item.json.toNumber;\n\nlet text = '';\nfor (const block of (response.content || [])) {\n  if (block.type === 'text') text += block.text;\n}\n\nconst match = text.match(/```(?:json)?\\s*([\\s\\S]*?)\\s*```/);\nconst jsonStr = match ? match[1] : text.trim();\nconst positions = JSON.parse(jsonStr);\n\nif (!Array.isArray(positions)) throw new Error('Expected array of positions');\n\nconst rows = positions.map(p => [\n  today,\n  String(p.ticker ?? ''),\n  String(p.company ?? ''),\n  p.shares ?? '',\n  p.avg_cost ?? '',\n  p.current_price ?? '',\n  p.market_value ?? '',\n  p.gain_loss ?? '',\n  p.gain_loss_pct ?? ''\n]);\n\nlet totalValue = 0, totalGL = 0;\nfor (const p of positions) {\n  totalValue += Number(p.market_value ?? 0);\n  totalGL += Number(p.gain_loss ?? 0);\n}\n\nconst sign = totalGL >= 0 ? '+' : '-';\nconst absGL = Math.abs(totalGL);\nconst glPct = totalValue > 0 ? ((totalGL / (totalValue - totalGL)) * 100).toFixed(1) : '0.0';\nconst fmtVal = totalValue.toLocaleString('en-US', { maximumFractionDigits: 0 });\n\nconst replyMessage = `✅ Portfolio updated!\\n\\n📊 ${positions.length} positions\\n💰 Total value: $${fmtVal}\\n📈 P&L: ${sign}$${absGL.toFixed(0)} (${sign}${glPct}%)\\n\\n🗓 Snapshot: ${today}`;\n\nreturn [{\n  json: {\n    rows: JSON.stringify(rows),\n    replyMessage,\n    fromNumber,\n    toNumber\n  }\n}];"
+      }
+    },
+    {
+      "id": "n7",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1580, 180],
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/REPLACE_WITH_SPREADSHEET_ID/values/Portfolio!A:I:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "content-type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ JSON.stringify({ values: JSON.parse($json.rows) }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_GOOGLE_CRED_ID",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "id": "n8",
+      "name": "Send WhatsApp Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 180],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/REPLACE_WITH_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "From", "value": "={{ $json.toNumber }}"},
+            {"name": "To", "value": "={{ $json.fromNumber }}"},
+            {"name": "Body", "value": "={{ $json.replyMessage }}"}
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_WITH_TWILIO_CRED_ID",
+          "name": "Twilio Basic Auth"
+        }
+      }
+    },
+    {
+      "id": "n9",
+      "name": "Respond 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2020, 180],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {"responseCode": 200}
+      }
+    },
+    {
+      "id": "n10",
+      "name": "Send No-Image Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 420],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twilio.com/2010-04-01/Accounts/REPLACE_WITH_ACCOUNT_SID/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {"name": "From", "value": "={{ $json.body.To }}"},
+            {"name": "To", "value": "={{ $json.body.From }}"},
+            {"name": "Body", "value": "📸 Please send a screenshot of your portfolio to update it."}
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "REPLACE_WITH_TWILIO_CRED_ID",
+          "name": "Twilio Basic Auth"
+        }
+      }
+    },
+    {
+      "id": "n11",
+      "name": "Respond 200 OK (No Image)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [920, 420],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {"responseCode": 200}
+      }
+    }
+  ],
+  "connections": {
+    "Portfolio Webhook": {
+      "main": [
+        [{"node": "Has Image?", "type": "main", "index": 0}]
+      ]
+    },
+    "Has Image?": {
+      "main": [
+        [{"node": "Download Portfolio Image", "type": "main", "index": 0}],
+        [{"node": "Send No-Image Reply", "type": "main", "index": 0}]
+      ]
+    },
+    "Download Portfolio Image": {
+      "main": [
+        [{"node": "Prepare Base64", "type": "main", "index": 0}]
+      ]
+    },
+    "Prepare Base64": {
+      "main": [
+        [{"node": "Claude Vision — Extract Portfolio", "type": "main", "index": 0}]
+      ]
+    },
+    "Claude Vision — Extract Portfolio": {
+      "main": [
+        [{"node": "Parse & Build Sheet Rows", "type": "main", "index": 0}]
+      ]
+    },
+    "Parse & Build Sheet Rows": {
+      "main": [
+        [{"node": "Append to Google Sheets", "type": "main", "index": 0}]
+      ]
+    },
+    "Append to Google Sheets": {
+      "main": [
+        [{"node": "Send WhatsApp Reply", "type": "main", "index": 0}]
+      ]
+    },
+    "Send WhatsApp Reply": {
+      "main": [
+        [{"node": "Respond 200 OK", "type": "main", "index": 0}]
+      ]
+    },
+    "Send No-Image Reply": {
+      "main": [
+        [{"node": "Respond 200 OK (No Image)", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "reymen-analytics"
+  }
+}
