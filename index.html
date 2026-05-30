@@ -53,6 +53,13 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
   line-height:1;transition:border-color .12s;align-items:center;justify-content:center;
 }
 .menu-btn:hover{border-color:rgba(0,229,160,.4)}
+.mb-btn{
+  font-family:var(--mono);font-size:11px;color:var(--dim);
+  background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;
+  padding:4px 10px;cursor:pointer;text-decoration:none;
+  transition:all .12s;display:flex;align-items:center;gap:4px;
+}
+.mb-btn:hover{color:var(--green);border-color:rgba(0,229,160,.3);background:var(--gd)}
 
 /* ── LAYOUT ── */
 .layout{display:flex;height:100vh;padding-top:56px}
@@ -114,13 +121,6 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 .mb-crumb{font-family:var(--mono);font-size:11px;color:var(--muted)}
 .mb-date{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--txt)}
 .mb-spacer{flex:1}
-.mb-btn{
-  font-family:var(--mono);font-size:11px;color:var(--dim);
-  background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;
-  padding:4px 10px;cursor:pointer;text-decoration:none;
-  transition:all .12s;display:flex;align-items:center;gap:4px;
-}
-.mb-btn:hover{color:var(--green);border-color:rgba(0,229,160,.3);background:var(--gd)}
 
 .report-frame{flex:1;border:none;background:var(--bg);width:100%;display:none}
 
@@ -162,6 +162,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
     <span class="nav-sub">Daily&nbsp;Reports</span>
   </a>
   <div class="nav-spacer"></div>
+  <a class="mb-btn" href="portfolio.html">&#128202;&nbsp;Portfolio</a>
   <span class="nav-count" id="navCount">Loading&hellip;</span>
 </nav>
 
