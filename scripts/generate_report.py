@@ -71,11 +71,11 @@ def generate_report(prompt: str) -> str:
         if response.stop_reason == "pause_turn":
             continue
 
-if response.stop_reason == "max_tokens":
-    raise RuntimeError(
-        "Claude reached max_tokens before completing the report. "
-        "Increase max_tokens, reduce prompt size, or use a stronger model."
-    )
+        if response.stop_reason == "max_tokens":
+            raise RuntimeError(
+                "Claude reached max_tokens before completing the report. "
+                "Increase max_tokens, reduce prompt size, or use a stronger model."
+            )
 
         raise RuntimeError(f"Unexpected stop_reason: {response.stop_reason!r}")
 
