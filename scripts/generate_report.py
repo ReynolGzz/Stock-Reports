@@ -23,12 +23,10 @@ def extract_html(content_blocks) -> str:
     ]
     raw = "\n".join(text_parts).strip()
 
-    # Strip markdown code fences if Claude wrapped the output
     match = re.search(r"```(?:html)?\s*\n(.*?)\n```", raw, re.DOTALL)
     if match:
         return match.group(1).strip()
 
-    # Locate the start of the HTML document
     for marker in ("<!DOCTYPE", "<!doctype", "<html", "<HTML"):
         idx = raw.find(marker)
         if idx != -1:
@@ -39,12 +37,7 @@ def extract_html(content_blocks) -> str:
 
 
 def generate_report(prompt: str) -> str:
-    """
-    Run the agentic loop to generate the HTML report via Claude with web search.
-    The web_search_20250305 tool is server-side: the API returns pause_turn while
-    searches are in flight, and end_turn when the full response is ready.
-    """
-    client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
+    client = anthropic.Anthropic()
     tools = [{"type": "web_search_20250305", "name": "web_search", "max_uses": 12}]
     messages = [{"role": "user", "content": prompt}]
     max_iter = 30
@@ -55,7 +48,7 @@ def generate_report(prompt: str) -> str:
 
         response = client.messages.create(
             model="claude-sonnet-4-5",
-            max_tokens=9000,
+            max_tokens=16000,
             tools=tools,
             messages=messages,
         )
@@ -63,7 +56,6 @@ def generate_report(prompt: str) -> str:
         block_types = [getattr(b, "type", "?") for b in response.content]
         print(f"  stop_reason={response.stop_reason!r}  blocks={block_types}", flush=True)
 
-        # Append this assistant turn so the loop can continue
         messages.append({"role": "assistant", "content": response.content})
 
         if response.stop_reason == "end_turn":
@@ -77,8 +69,16 @@ def generate_report(prompt: str) -> str:
             return html
 
         if response.stop_reason == "pause_turn":
-            # Server-side web search is still running; continue the loop.
             continue
+
+        if response.stop_reason == "max_tokens":
+            print("WARNING: Claude reached max_tokens limit", file=sys.stderr)
+            html = extract_html(response.content)
+            if len(html) < 200:
+                raise RuntimeError(
+                    f"Claude reached max_tokens but no valid HTML was extracted. Preview: {html[:300]}"
+                )
+            return html
 
         raise RuntimeError(f"Unexpected stop_reason: {response.stop_reason!r}")
 
