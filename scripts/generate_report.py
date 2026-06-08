@@ -54,8 +54,8 @@ def generate_report(prompt: str) -> str:
         print(f"[{ts}] API call #{iteration}…", flush=True)
 
         response = client.messages.create(
-            model="claude-opus-4-8",
-            max_tokens=16000,
+            model="claude-sonnet-4-5",
+            max_tokens=9000,
             tools=tools,
             messages=messages,
         )
