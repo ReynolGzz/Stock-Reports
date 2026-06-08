@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reymen · Analytics — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090d;--bg1:#0c0e18;--bg2:#10131e;--bg3:#141828;
+  --card:#0f1220;--card2:#131726;
+  --bdr:rgba(255,255,255,.065);--bdr2:rgba(255,255,255,.03);
+  --green:#00e5a0;--gd:rgba(0,229,160,.10);--gd2:rgba(0,229,160,.18);
+  --red:#ff4060;--rd:rgba(255,64,96,.10);
+  --amb:#ffb830;--blu:#3d8ef8;
+  --txt:#dde2ee;--muted:#5a6175;--dim:#8892a4;--sub:#2d3448;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:var(--bg);color:var(--txt);font-family:var(--sans)}
+
+.nav{
+  position:sticky;top:0;height:56px;background:var(--bg1);
+  border-bottom:1px solid var(--bdr);display:flex;align-items:center;
+  padding:0 20px;z-index:100;gap:12px;
+}
+.nav-back{
+  font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;
+  background:var(--bg2);border:1px solid var(--bdr);border-radius:5px;
+  padding:4px 10px;transition:all .12s;display:flex;align-items:center;gap:4px;
+}
+.nav-back:hover{color:var(--txt);border-color:rgba(255,255,255,.15)}
+.nav-brand{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--txt);
+}
+.pulse{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);flex-shrink:0;animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.nav-sep{color:var(--muted);margin:0 4px}
+.nav-section{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.nav-spacer{flex:1}
+.sync-btn{
+  font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer;
+  background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;padding:3px 12px;
+  transition:all .12s;
+}
+.sync-btn:hover{color:var(--green);border-color:rgba(0,229,160,.3)}
+
+.page{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
+
+.kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.kcard{
+  background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:18px;
+}
+.kc-lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.kc-val{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--txt);letter-spacing:-.02em}
+.kc-val.pos{color:var(--green)}
+.kc-val.neg{color:var(--red)}
+.kc-sub{font-size:11px;color:var(--dim);margin-top:3px}
+
+.slbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+.tbl-wrap{
+  background:var(--card);border:1px solid var(--bdr);border-radius:10px;
+  overflow:hidden;margin-bottom:20px;
+}
+table{width:100%;border-collapse:collapse}
+thead th{
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);padding:12px 14px;text-align:right;border-bottom:1px solid var(--bdr);
+  background:var(--bg2);white-space:nowrap;
+}
+thead th:first-child,thead th:nth-child(2){text-align:left}
+tbody tr{border-bottom:1px solid var(--bdr2);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg2)}
+tbody td{padding:11px 14px;font-size:13px;text-align:right;color:var(--txt)}
+tbody td:first-child{text-align:left}
+tbody td:nth-child(2){text-align:left;color:var(--dim);font-size:12px}
+.tick{font-family:var(--mono);font-size:13px;font-weight:600}
+.mono{font-family:var(--mono);font-size:12px}
+.pos{color:var(--green);font-family:var(--mono);font-size:12px;font-weight:500}
+.neg{color:var(--red);font-family:var(--mono);font-size:12px;font-weight:500}
+
+.state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:56px 20px;text-align:center;gap:12px;
+}
+.state-ico{font-size:32px;opacity:.3;margin-bottom:4px}
+.state-ttl{font-family:var(--mono);font-size:13px;color:var(--dim)}
+.state-sub{font-size:12px;color:var(--muted);max-width:320px;line-height:1.65}
+
+.pfooter{
+  display:flex;align-items:center;gap:10px;padding:10px 0;
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  border-top:1px solid var(--bdr2);
+}
+.pfooter-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.pfooter-spacer{flex:1}
+.cfg-btn{
+  font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;
+  background:var(--bg1);border:1px solid var(--bdr);border-radius:5px;
+  padding:4px 10px;transition:all .12s;
+}
+.cfg-btn:hover{color:var(--green);border-color:rgba(0,229,160,.3);background:var(--gd)}
+
+.modal-bg{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:200;align-items:center;justify-content:center;padding:20px;
+}
+.modal-bg.on{display:flex}
+.modal{
+  background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:28px;max-width:500px;width:100%;
+}
+.modal-title{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--txt);margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:20px}
+.modal-lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.modal-input{
+  width:100%;background:var(--bg2);border:1px solid var(--bdr);border-radius:7px;
+  padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--txt);
+  outline:none;margin-bottom:10px;transition:border-color .15s;
+}
+.modal-input:focus{border-color:rgba(0,229,160,.35)}
+.modal-hint{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.modal-hint code{font-family:var(--mono);font-size:10px;color:var(--dim);background:var(--bg3);padding:1px 4px;border-radius:3px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.btn-sec{
+  font-family:var(--mono);font-size:12px;color:var(--dim);cursor:pointer;
+  background:none;border:1px solid var(--bdr);border-radius:6px;padding:7px 14px;
+  transition:all .12s;
+}
+.btn-sec:hover{color:var(--txt);border-color:rgba(255,255,255,.15)}
+.btn-pri{
+  font-family:var(--mono);font-size:12px;color:var(--bg);cursor:pointer;
+  background:var(--green);border:none;border-radius:6px;padding:7px 16px;font-weight:600;
+  transition:opacity .12s;
+}
+.btn-pri:hover{opacity:.85}
+
+@media(max-width:768px){
+  .kpi4{grid-template-columns:repeat(2,1fr)}
+  .page{padding:16px 14px 40px}
+  thead th:nth-child(2),tbody td:nth-child(2),
+  thead th:nth-child(4),tbody td:nth-child(4),
+  thead th:nth-child(5),tbody td:nth-child(5){display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-back" href="index.html">&larr; Reports</a>
+  <div class="nav-brand">
+    <span class="pulse"></span>
+    Reymen&nbsp;&middot;&nbsp;Analytics
+    <span class="nav-sep">&middot;</span>
+    <span class="nav-section">Portfolio</span>
+  </div>
+  <div class="nav-spacer"></div>
+  <button class="sync-btn" id="syncBtn" onclick="refresh()">&#8635; Refresh</button>
+</nav>
+
+<div class="page">
+  <div class="kpi4">
+    <div class="kcard"><div class="kc-lbl">Total Value</div><div class="kc-val" id="kTotal">&mdash;</div><div class="kc-sub">Market Value</div></div>
+    <div class="kcard"><div class="kc-lbl">Total P&amp;L $</div><div class="kc-val" id="kGL">&mdash;</div><div class="kc-sub">Unrealized</div></div>
+    <div class="kcard"><div class="kc-lbl">Total P&amp;L %</div><div class="kc-val" id="kGLPct">&mdash;</div><div class="kc-sub">vs. Cost Basis</div></div>
+    <div class="kcard"><div class="kc-lbl">Positions</div><div class="kc-val" id="kPos">&mdash;</div><div class="kc-sub" id="kDate">Last upload &mdash;</div></div>
+  </div>
+
+  <div class="slbl">Current Positions</div>
+  <div class="tbl-wrap" id="tblWrap">
+    <div class="state">
+      <div class="state-ico">&#8987;</div>
+      <div class="state-ttl">Loading&hellip;</div>
+    </div>
+  </div>
+
+  <div class="pfooter">
+    <span class="pfooter-dot"></span>
+    <span id="footerTxt">Synced via WhatsApp &rarr; n8n &rarr; Google Sheets</span>
+    <div class="pfooter-spacer"></div>
+    <button class="cfg-btn" onclick="openCfg()">&#9881; Configure</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title">Configure Data Source</div>
+    <div class="modal-sub">Paste the published CSV URL from your Google Sheets <strong>Portfolio</strong> sheet.</div>
+    <div class="modal-lbl">Google Sheets CSV URL</div>
+    <input class="modal-input" type="url" id="csvUrl"
+      placeholder="https://docs.google.com/spreadsheets/d/…/pub?output=csv">
+    <div class="modal-hint">
+      In Google Sheets: <strong>File &rarr; Share &rarr; Publish to web</strong> &rarr; select sheet <strong>Portfolio</strong> &rarr; format <code>CSV</code> &rarr; copy link.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sec" onclick="closeCfg()">Cancel</button>
+      <button class="btn-pri" onclick="saveCfg()">Save &amp; Load</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS = 'reymen_portfolio_csv';
+
+function $(id){return document.getElementById(id)}
+
+function fmt$(n){
+  if(n==null||isNaN(n))return '—';
+  return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+}
+function fmtPct(n){
+  if(n==null||isNaN(n))return '—';
+  const v=Number(n);
+  return(v>=0?'+':'')+v.toFixed(2)+'%';
+}
+
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  if(lines.length<2)return[];
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
+  return lines.slice(1).map(line=>{
+    // handle commas inside quoted fields
+    const cols=[];
+    let cur='',inQ=false;
+    for(const c of line){
+      if(c=='"'){inQ=!inQ}
+      else if(c==','&&!inQ){cols.push(cur.trim());cur='';}
+      else cur+=c;
+    }
+    cols.push(cur.trim());
+    const row={};
+    headers.forEach((h,i)=>row[h]=cols[i]??'');
+    return row;
+  }).filter(r=>r.ticker&&r.ticker!=='ticker');
+}
+
+function col(row,...keys){
+  for(const k of keys)if(row[k]!==undefined&&row[k]!=='')return row[k];
+  return null;
+}
+
+function renderTable(rows){
+  if(!rows.length){
+    $('tblWrap').innerHTML=`<div class="state">
+      <div class="state-ico">📢</div>
+      <div class="state-ttl">No positions found</div>
+      <div class="state-sub">Send a portfolio screenshot to WhatsApp. Data appears here automatically after the n8n workflow processes it.</div>
+    </div>`;
+    return;
+  }
+  rows.sort((a,b)=>Number(col(b,'market value','market_value')??0)-Number(col(a,'market value','market_value')??0));
+  $('tblWrap').innerHTML=`<table>
+    <thead><tr>
+      <th>Ticker</th><th>Company</th><th>Shares</th>
+      <th>Avg Cost</th><th>Price</th><th>Market Value</th>
+      <th>P&amp;L $</th><th>P&amp;L %</th>
+    </tr></thead>
+    <tbody>${rows.map(r=>{
+      const gl=parseFloat(col(r,'p&l $','gain_loss','p&l$','gain loss')??0);
+      const glp=parseFloat(col(r,'p&l %','gain_loss_pct','p&l%','gain loss %')??0);
+      const pos=gl>=0;
+      return`<tr>
+        <td><span class="tick">${col(r,'ticker')??'—'}</span></td>
+        <td>${col(r,'company')??''}</td>
+        <td class="mono">${col(r,'shares')??'—'}</td>
+        <td class="mono">${fmt$(col(r,'avg cost','avg_cost'))}</td>
+        <td class="mono">${fmt$(col(r,'current price','current_price'))}</td>
+        <td class="mono">${fmt$(col(r,'market value','market_value'))}</td>
+        <td class="${pos?'pos':'neg'}">${pos?'+':''}${fmt$(gl)}</td>
+        <td class="${pos?'pos':'neg'}">${fmtPct(glp)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function updateKPIs(rows){
+  let tv=0,tg=0;
+  const date=col(rows[0],'date')??'';
+  for(const r of rows){
+    tv+=Number(col(r,'market value','market_value')??0);
+    tg+=Number(col(r,'p&l $','gain_loss','p&l$')??0);
+  }
+  const glp=tv>0?((tg/(tv-tg))*100):0;
+  const pos=tg>=0;
+  $('kTotal').textContent=fmt$(tv);
+  $('kGL').className='kc-val '+(pos?'pos':'neg');
+  $('kGL').textContent=(pos?'+':'')+fmt$(tg);
+  $('kGLPct').className='kc-val '+(pos?'pos':'neg');
+  $('kGLPct').textContent=fmtPct(glp);
+  $('kPos').textContent=rows.length;
+  if(date)$('kDate').textContent='Last upload: '+date;
+}
+
+async function loadPortfolio(){
+  const url=localStorage.getItem(LS);
+  if(!url){
+    $('tblWrap').innerHTML=`<div class="state">
+      <div class="state-ico">⚙️</div>
+      <div class="state-ttl">Not configured</div>
+      <div class="state-sub">Click <strong>Configure</strong> below and paste your Google Sheets published CSV URL to connect your portfolio data.</div>
+    </div>`;
+    return;
+  }
+  $('tblWrap').innerHTML='<div class="state"><div class="state-ttl">&#8987;&nbsp; Loading portfolio&hellip;</div></div>';
+  try{
+    const res=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now());
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const rows=parseCSV(text);
+    renderTable(rows);
+    if(rows.length)updateKPIs(rows);
+    $('footerTxt').textContent='Synced via WhatsApp → n8n → Google Sheets · '+new Date().toLocaleTimeString();
+  }catch(e){
+    $('tblWrap').innerHTML=`<div class="state">
+      <div class="state-ico">⚠️</div>
+      <div class="state-ttl">Failed to load</div>
+      <div class="state-sub">${e.message}<br>Verify the CSV URL is correct and the sheet is published publicly.</div>
+    </div>`;
+  }
+}
+
+function refresh(){
+  $('syncBtn').textContent='⌛ Loading…';
+  loadPortfolio().finally(()=>{ $('syncBtn').innerHTML='&#8635; Refresh'; });
+}
+
+function openCfg(){
+  $('csvUrl').value=localStorage.getItem(LS)||'';
+  $('modalBg').classList.add('on');
+}
+function closeCfg(){$('modalBg').classList.remove('on')}
+function saveCfg(){
+  const url=$('csvUrl').value.trim();
+  if(!url){alert('Please enter a URL.');return;}
+  localStorage.setItem(LS,url);
+  closeCfg();
+  loadPortfolio();
+}
+$('modalBg').addEventListener('click',e=>{if(e.target===$('modalBg'))closeCfg();});
+
+loadPortfolio();
+</script>
+</body>
+</html>

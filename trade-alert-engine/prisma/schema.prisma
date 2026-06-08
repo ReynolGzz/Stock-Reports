@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReportFile {
+  id          String      @id @default(cuid())
+  source      String      // "url" | "paste"
+  sourceUrl   String?
+  rawContent  String      @db.Text
+  setup       TradeSetup?
+  createdAt   DateTime    @default(now())
+}
+
+model TradeSetup {
+  id              String           @id @default(cuid())
+  reportFileId    String?          @unique
+  reportFile      ReportFile?      @relation(fields: [reportFileId], references: [id])
+  ticker          String
+  companyName     String?
+  strategyType    String
+  bias            String
+  entryMode       String
+  entryZoneMin    Float?
+  entryZoneMax    Float?
+  maxChasePrice   Float?
+  stopLoss        Float?
+  target1         Float?
+  target2         Float?
+  holdWindowDays  Int?
+  status          String           @default("active")
+  rawThesisJson   Json
+  conditions      Condition[]
+  avoidConditions AvoidCondition[]
+  alertRules      AlertRule[]
+  alerts          Alert[]
+  snapshots       MarketSnapshot[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  lastCheckedAt   DateTime?
+  triggeredAt     DateTime?
+
+  @@index([ticker])
+  @@index([status])
+}
+
+model Condition {
+  id          String     @id @default(cuid())
+  setupId     String
+  setup       TradeSetup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  type        String
+  description String     @db.Text
+  required    Boolean    @default(true)
+  met         Boolean    @default(false)
+  metAt       DateTime?
+  metReason   String?    @db.Text
+  params      Json?
+
+  @@index([setupId])
+}
+
+model AvoidCondition {
+  id          String     @id @default(cuid())
+  setupId     String
+  setup       TradeSetup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  type        String
+  description String     @db.Text
+  active      Boolean    @default(false)
+  triggeredAt DateTime?
+
+  @@index([setupId])
+}
+
+model AlertRule {
+  id              String     @id @default(cuid())
+  setupId         String
+  setup           TradeSetup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  event           String
+  messageTemplate String     @db.Text
+  cooldownHours   Int        @default(24)
+  lastFiredAt     DateTime?
+  alerts          Alert[]
+
+  @@index([setupId])
+}
+
+model Alert {
+  id          String         @id @default(cuid())
+  setupId     String
+  setup       TradeSetup     @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  ruleId      String?
+  rule        AlertRule?     @relation(fields: [ruleId], references: [id])
+  event       String
+  message     String         @db.Text
+  explanation String         @db.Text
+  channel     String
+  sentAt      DateTime       @default(now())
+  status      String         @default("sent")
+  snapshotId  String?
+  snapshot    MarketSnapshot? @relation(fields: [snapshotId], references: [id])
+
+  @@index([setupId])
+  @@index([sentAt])
+}
+
+model MarketSnapshot {
+  id            String     @id @default(cuid())
+  setupId       String
+  setup         TradeSetup @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  ticker        String
+  price         Float
+  open          Float?
+  high          Float?
+  low           Float?
+  close         Float?
+  volume        Float?
+  changePercent Float?
+  provider      String
+  capturedAt    DateTime   @default(now())
+  alerts        Alert[]
+
+  @@index([ticker, capturedAt])
+  @@index([setupId])
+}
+
+model NotificationChannel {
+  id        String   @id @default(cuid())
+  type      String
+  config    Json
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
