@@ -47,7 +47,7 @@ def generate_report(prompt: str) -> str:
         print(f"[{ts}] API call #{iteration}…", flush=True)
 
         response = client.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-opus-4-8",
             max_tokens=16000,
             tools=tools,
             messages=messages,
@@ -71,14 +71,11 @@ def generate_report(prompt: str) -> str:
         if response.stop_reason == "pause_turn":
             continue
 
-        if response.stop_reason == "max_tokens":
-            print("WARNING: Claude reached max_tokens limit", file=sys.stderr)
-            html = extract_html(response.content)
-            if len(html) < 200:
-                raise RuntimeError(
-                    f"Claude reached max_tokens but no valid HTML was extracted. Preview: {html[:300]}"
-                )
-            return html
+if response.stop_reason == "max_tokens":
+    raise RuntimeError(
+        "Claude reached max_tokens before completing the report. "
+        "Increase max_tokens, reduce prompt size, or use a stronger model."
+    )
 
         raise RuntimeError(f"Unexpected stop_reason: {response.stop_reason!r}")
 
