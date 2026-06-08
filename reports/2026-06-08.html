@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA · Swing Trade Risk Score Report | Reymen Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#08090d;
+--bg1:#0c0e18;
+--bg2:#10131e;
+--bg3:#141828;
+--card:#0f1220;
+--card2:#131726;
+--bdr:rgba(255,255,255,.065);
+--bdr2:rgba(255,255,255,.03);
+--green:#00e5a0;
+--gd:rgba(0,229,160,.10);
+--gd2:rgba(0,229,160,.18);
+--red:#ff4060;
+--rd:rgba(255,64,96,.10);
+--rd2:rgba(255,64,96,.18);
+--amb:#ffb830;
+--ad:rgba(255,184,48,.10);
+--ad2:rgba(255,184,48,.18);
+--blu:#3d8ef8;
+--bd:rgba(61,142,248,.10);
+--bd2:rgba(61,142,248,.18);
+--pur:#9b6fff;
+--pd:rgba(155,111,255,.10);
+--txt:#dde2ee;
+--muted:#5a6175;
+--dim:#8892a4;
+--sub:#2d3448;
+--mono:'JetBrains Mono',monospace;
+--sans:'DM Sans',sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+background:var(--bg);
+color:var(--txt);
+font-family:var(--sans);
+line-height:1.6;
+overflow-x:hidden;
+}
+
+.nav{
+position:sticky;
+top:0;
+background:rgba(12,14,24,0.92);
+backdrop-filter:blur(12px);
+border-bottom:1px solid var(--bdr);
+padding:18px 0;
+z-index:1000;
+}
+.nav-inner{
+max-width:1400px;
+margin:0 auto;
+padding:0 32px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+.nav-brand{
+font-size:15px;
+font-weight:600;
+letter-spacing:0.3px;
+font-family:var(--mono);
+text-transform:uppercase;
+}
+.pulse{
+display:inline-block;
+width:6px;
+height:6px;
+background:var(--green);
+border-radius:50%;
+margin-right:10px;
+animation:pulse 2s ease-in-out infinite;
+box-shadow:0 0 8px var(--green);
+}
+@keyframes pulse{
+0%,100%{opacity:1;}
+50%{opacity:0.4;}
+}
+.nav-links{
+display:flex;
+gap:28px;
+}
+.nl{
+font-size:13px;
+font-weight:500;
+color:var(--dim);
+text-decoration:none;
+transition:color 0.2s;
+font-family:var(--mono);
+}
+.nl:hover{color:var(--txt);}
+
+.page{
+max-width:1400px;
+margin:0 auto;
+padding:64px 32px;
+}
+
+.pdiv{
+display:flex;
+align-items:center;
+gap:14px;
+margin:80px 0 48px;
+}
+.pdiv::before,
+.pdiv::after{
+content:'';
+flex:1;
+height:1px;
+background:linear-gradient(90deg,transparent,var(--bdr),transparent);
+}
+.pdiv-pill{
+background:var(--card);
+border:1px solid var(--bdr);
+padding:8px 20px;
+border-radius:20px;
+font-size:11px;
+font-weight:600;
+letter-spacing:1.2px;
+text-transform:uppercase;
+font-family:var(--mono);
+color:var(--dim);
+}
+
+.slbl{
+font-size:11px;
+font-weight:600;
+letter-spacing:1.4px;
+text-transform:uppercase;
+color:var(--muted);
+margin-bottom:12px;
+font-family:var(--mono);
+}
+
+.xbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:20px;
+}
+
+.btn{
+background:var(--card);
+border:1px solid var(--bdr);
+padding:12px 24px;
+border-radius:8px;
+font-size:13px;
+font-weight:600;
+color:var(--txt);
+cursor:pointer;
+transition:all 0.2s;
+font-family:var(--mono);
+}
+.btn:hover{
+background:var(--bg3);
+border-color:rgba(255,255,255,0.12);
+}
+.btnp{
+background:var(--green);
+color:#000;
+border:none;
+}
+.btnp:hover{
+background:#00fbb4;
+transform:translateY(-1px);
+}
+
+.card{
+background:var(--card);
+border:1px solid var(--bdr);
+border-radius:12px;
+padding:32px;
+transition:border-color 0.3s;
+}
+.card:hover{border-color:rgba(255,255,255,0.1);}
+
+.hero{
+background:linear-gradient(135deg,var(--card),var(--bg2));
+border:1px solid var(--bdr);
+border-radius:16px;
+padding:48px;
+text-align:center;
+margin-bottom:48px;
+}
+.hero h1{
+font-size:32px;
+font-weight:700;
+margin-bottom:12px;
+}
+.hero p{
+font-size:16px;
+color:var(--dim);
+max-width:700px;
+margin:0 auto 32px;
+}
+
+.kpi4{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:24px;
+}
+.kpi4 .card{
+padding:24px;
+text-align:center;
+}
+.kpi4 .slbl{text-align:center;margin-bottom:8px;}
+.kpi4 .val{
+font-size:24px;
+font-weight:700;
+font-family:var(--mono);
+color:var(--green);
+}
+.kpi4 .valt{color:var(--txt);}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px;}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:48px;}
+
+.chk-card{margin-top:48px;}
+.chk-list{list-style:none;padding:0;}
+.chk-list li{
+padding:16px;
+border-bottom:1px solid var(--bdr2);
+display:flex;
+align-items:flex-start;
+gap:12px;
+}
+.chk-list li:last-child{border-bottom:none;}
+.chk-list li::before{
+content:'✓';
+color:var(--green);
+font-weight:700;
+font-size:18px;
+margin-top:2px;
+}
+
+.flow-card{margin-top:48px;}
+.flow-steps{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:20px;
+margin-top:24px;
+}
+.flow-step{
+background:var(--bg2);
+border:1px solid var(--bdr);
+border-radius:10px;
+padding:24px;
+text-align:center;
+position:relative;
+}
+.flow-step::after{
+content:'→';
+position:absolute;
+right:-18px;
+top:50%;
+transform:translateY(-50%);
+color:var(--muted);
+font-size:20px;
+}
+.flow-step:last-child::after{display:none;}
+.flow-step .num{
+font-size:14px;
+font-weight:700;
+color:var(--green);
+font-family:var(--mono);
+margin-bottom:8px;
+}
+.flow-step .lbl{
+font-size:15px;
+font-weight:600;
+}
+
+.avoid-card{margin-top:48px;}
+.avoid-card .card{
+background:linear-gradient(135deg,var(--card),rgba(255,64,96,0.05));
+border-color:rgba(255,64,96,0.15);
+}
+.avoid-list{list-style:none;padding:0;}
+.avoid-list li{
+padding:16px;
+border-bottom:1px solid rgba(255,64,96,0.08);
+display:flex;
+align-items:flex-start;
+gap:12px;
+}
+.avoid-list li:last-child{border-bottom:none;}
+.avoid-list li::before{
+content:'✗';
+color:var(--red);
+font-weight:700;
+font-size:18px;
+margin-top:2px;
+}
+
+.tgt-card{margin-top:48px;}
+.tgt-bars{margin-top:20px;}
+.tgt-bar{
+margin-bottom:20px;
+}
+.tgt-bar .lbl{
+display:flex;
+justify-content:space-between;
+margin-bottom:8px;
+font-size:14px;
+font-family:var(--mono);
+}
+.tgt-bar .bar{
+width:100%;
+height:12px;
+background:var(--bg2);
+border-radius:6px;
+overflow:hidden;
+}
+.tgt-bar .fill{
+height:100%;
+background:linear-gradient(90deg,var(--green),var(--amb));
+border-radius:6px;
+transition:width 0.6s ease-out;
+}
+
+.final{
+background:linear-gradient(135deg,var(--card2),var(--bg2));
+border:1px solid var(--bdr);
+border-radius:16px;
+padding:40px;
+margin-top:64px;
+text-align:center;
+}
+.final h2{
+font-size:28px;
+margin-bottom:16px;
+}
+.final p{
+font-size:16px;
+color:var(--dim);
+max-width:800px;
+margin:0 auto 24px;
+}
+.final .rating-bar{
+background:var(--bg2);
+border-radius:10px;
+padding:20px;
+display:inline-flex;
+align-items:center;
+gap:12px;
+font-family:var(--mono);
+font-weight:700;
+font-size:16px;
+}
+.final .rating-bar span{color:var(--green);}
+
+.stkh{
+background:linear-gradient(135deg,var(--card),var(--bg2));
+border:1px solid var(--bdr);
+border-radius:16px;
+padding:40px;
+margin-bottom:48px;
+display:grid;
+grid-template-columns:2fr 3fr;
+gap:48px;
+align-items:center;
+}
+.ticker{
+font-size:48px;
+font-weight:700;
+font-family:var(--mono);
+color:var(--txt);
+letter-spacing:-1px;
+margin-bottom:8px;
+}
+.comp{
+font-size:18px;
+color:var(--dim);
+margin-bottom:24px;
+}
+.price-big{
+font-size:56px;
+font-weight:700;
+font-family:var(--mono);
+color:var(--green);
+margin-bottom:8px;
+}
+.day-range{
+font-size:13px;
+color:var(--muted);
+font-family:var(--mono);
+}
+.rating-pill{
+display:inline-block;
+background:var(--gd);
+border:1px solid var(--green);
+padding:8px 16px;
+border-radius:20px;
+font-size:12px;
+font-weight:700;
+color:var(--green);
+font-family:var(--mono);
+text-transform:uppercase;
+letter-spacing:0.8px;
+margin-top:16px;
+}
+
+.mini6{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+margin-bottom:32px;
+}
+.mini6 .card{
+padding:20px;
+}
+.mini6 .slbl{
+margin-bottom:6px;
+font-size:10px;
+}
+.mini6 .val{
+font-size:20px;
+font-weight:700;
+font-family:var(--mono);
+}
+
+.gauge-row{
+display:grid;
+grid-template-columns:400px 1fr;
+gap:48px;
+margin:48px 0;
+align-items:center;
+}
+.gauge-card{
+text-align:center;
+}
+.gauge-svg{
+width:340px;
+height:200px;
+margin:0 auto;
+}
+.score-num{
+font-size:72px;
+font-weight:700;
+font-family:var(--mono);
+color:var(--green);
+margin:16px 0;
+}
+.score-lbl{
+font-size:14px;
+color:var(--dim);
+font-family:var(--mono);
+text-transform:uppercase;
+letter-spacing:1px;
+}
+.risk-side h3{
+font-size:20px;
+margin-bottom:16px;
+}
+.risk-side p{
+color:var(--dim);
+line-height:1.8;
+}
+
+.kpi8{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:20px;
+margin-bottom:32px;
+}
+.kpi8 .card{
+padding:20px;
+text-align:center;
+}
+.kpi8 .val{
+font-size:22px;
+font-weight:700;
+font-family:var(--mono);
+color:var(--green);
+margin-top:8px;
+}
+
+.chart-card{
+margin:48px 0;
+}
+.chart-card svg{
+width:100%;
+height:360px;
+}
+
+.mgrid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:24px;
+margin-top:32px;
+}
+.mcard{
+background:var(--card);
+border:1px solid var(--bdr);
+border-radius:12px;
+padding:28px;
+}
+.mcard h4{
+font-size:16px;
+margin-bottom:16px;
+color:var(--txt);
+}
+.mcard .met{
+display:flex;
+justify-content:space-between;
+margin-bottom:12px;
+font-size:13px;
+}
+.mcard .met .k{color:var(--muted);}
+.mcard .met .v{
+font-weight:600;
+font-family:var(--mono);
+}
+.mcard .verdict{
+margin-top:16px;
+padding-top:16px;
+border-top:1px solid var(--bdr2);
+font-size:13px;
+color:var(--dim);
+}
+.mcard .verdict strong{color:var(--green);}
+.mcard .verdict.caution strong{color:var(--amb);}
+.mcard .verdict.risk strong{color:var(--red);}
+
+.score-card{
+margin:48px 0;
+}
+.score-bars{
+margin-top:24px;
+}
+.score-bar{
+margin-bottom:28px;
+}
+.score-bar .top{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+}
+.score-bar .cat{
+font-size:15px;
+font-weight:600;
+}
+.score-bar .pts{
+font-size:14px;
+font-family:var(--mono);
+color:var(--green);
+}
+.score-bar .prog{
+width:100%;
+height:10px;
+background:var(--bg2);
+border-radius:5px;
+overflow:hidden;
+}
+.score-bar .fill{
+height:100%;
+background:linear-gradient(90deg,var(--green),var(--blu));
+border-radius:5px;
+}
+
+.earn-snap{
+margin:48px 0;
+}
+.earn-snap table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+.earn-snap th,
+.earn-snap td{
+padding:14px;
+text-align:left;
+border-bottom:1px solid var(--bdr2);
+font-size:13px;
+}
+.earn-snap th{
+background:var(--bg2);
+font-weight:600;
+text-transform:uppercase;
+letter-spacing:0.8px;
+font-size:11px;
+color:var(--muted);
+font-family:var(--mono);
+}
+.earn-snap td{
+font-family:var(--mono);
+}
+.earn-snap .pos{color:var(--green);}
+.earn-snap .neg{color:var(--red);}
+
+.twrap{
+background:var(--card);
+border:1px solid var(--bdr);
+border-radius:12px;
+padding:32px;
+margin:32px 0;
+}
+.twrap h3{
+font-size:20px;
+margin-bottom:20px;
+}
+.twrap p{
+color:var(--dim);
+line-height:1.8;
+margin-bottom:12px;
+}
+.twrap ul{
+list-style:none;
+padding-left:0;
+margin-top:16px;
+}
+.twrap ul li{
+padding:8px 0;
+padding-left:20px;
+position:relative;
+color:var(--dim);
+}
+.twrap ul li::before{
+content:'•';
+position:absolute;
+left:0;
+color:var(--green);
+font-weight:700;
+}
+
+.dual{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:32px;
+margin:48px 0;
+}
+.cat-card h3{
+font-size:20px;
+margin-bottom:20px;
+}
+.cat-card ul{
+list-style:none;
+padding:0;
+}
+.cat-card ul li{
+padding:12px 0;
+border-bottom:1px solid var(--bdr2);
+color:var(--dim);
+}
+.cat-card ul li:last-child{border-bottom:none;}
+.cat-card.catal ul li{color:var(--green);}
+.cat-card.risks ul li{color:var(--red);}
+
+.pred-card{
+margin:48px 0;
+}
+.pred-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:24px;
+margin-top:24px;
+}
+.pred-item{
+background:linear-gradient(135deg,var(--card),rgba(0,229,160,0.03));
+border:1px solid rgba(0,229,160,0.15);
+border-radius:16px;
+padding:28px;
+text-align:center;
+}
+.pred-item .tf{
+font-size:12px;
+font-weight:600;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:1px;
+font-family:var(--mono);
+margin-bottom:12px;
+}
+.pred-item .cp{
+font-size:14px;
+color:var(--dim);
+font-family:var(--mono);
+margin-bottom:8px;
+}
+.pred-item .tp{
+font-size:32px;
+font-weight:700;
+color:var(--green);
+font-family:var(--mono);
+margin-bottom:8px;
+}
+.pred-item .up{
+font-size:15px;
+color:var(--green);
+font-family:var(--mono);
+font-weight:600;
+margin-bottom:16px;
+}
+.pred-item svg{
+width:100%;
+height:40px;
+margin-top:12px;
+}
+
+.verdict-card{
+background:linear-gradient(135deg,var(--card2),rgba(0,229,160,0.05));
+border:1px solid rgba(0,229,160,0.15);
+border-radius:16px;
+padding:40px;
+margin:48px 0;
+}
+.verdict-card h2{
+font-size:28px;
+margin-bottom:20px;
+text-align:center;
+}
+.verdict-top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:32px;
+background:var(--bg2);
+border-radius:12px;
+padding:24px;
+}
+.verdict-top .item{text-align:center;}
+.verdict-top .slbl{
+text-align:center;
+margin-bottom:6px;
+}
+.verdict-top .val{
+font-size:20px;
+font-weight:700;
+font-family:var(--mono);
+color:var(--green);
+}
+.verdict-statement{
+font-size:16px;
+line-height:1.9;
+color:var(--dim);
+text-align:center;
+max-width:900px;
+margin:0 auto;
+}
+.verdict-statement strong{
+color:var(--txt);
+font-weight:600;
+}
+
+.wl4{
+margin:48px 0;
+}
+.wl4 h2{
+font-size:28px;
+margin-bottom:28px;
+}
+.wl-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:24px;
+}
+.wcard{
+background:var(--card);
+border:1px solid var(--bdr);
+border-radius:12px;
+padding:28px;
+}
+.wcard .wtick{
+font-size:24px;
+font-weight:700;
+font-family:var(--mono);
+margin-bottom:8px;
+}
+.wcard .wtype{
+font-size:12px;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:1px;
+font-family:var(--mono);
+margin-bottom:16px;
+}
+.wcard .wrow{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+font-size:13px;
+}
+.wcard .wrow .k{color:var(--muted);}
+.wcard .wrow .v{
+font-weight:600;
+font-family:var(--mono);
+}
+.wcard .risk-low{color:var(--green);}
+.wcard .risk-med{color:var(--amb);}
+.wcard .risk-high{color:var(--red);}
+
+.footer{
+max-width:1400px;
+margin:80px auto 0;
+padding:40px 32px;
+border-top:1px solid var(--bdr);
+}
+.footer-content{
+display:grid;
+grid-template-columns:2fr 1fr;
+gap:48px;
+}
+.footer h4{
+font-size:14px;
+margin-bottom:16px;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:1px;
+font-family:var(--mono);
+}
+.footer p,
+.footer ul{
+font-size:13px;
+color:var(--dim);
+line-height:1.8;
+}
+.footer ul{
+list-style:none;
+padding:0;
+}
+.footer ul li{
+margin-bottom:8px;
+}
+.footer-bottom{
+margin-top:32px;
+padding-top:24px;
+border-top:1px solid var(--bdr2);
+text-align:center;
+font-size:12px;
+color:var(--muted);
+font-family:var(--mono);
+}
+
+.toast{
+position:fixed;
+bottom:32px;
+right:32px;
+background:var(--green);
+color:#000;
+padding:16px 24px;
+border-radius:8px;
+font-weight:600;
+font-size:14px;
+font-family:var(--mono);
+box-shadow:0 8px 24px rgba(0,229,160,0.3);
+opacity:0;
+transform:translateY(20px);
+transition:all 0.3s ease-out;
+pointer-events:none;
+z-index:9999;
+}
+.toast.show{
+opacity:1;
+transform:translateY(0);
+}
+
+@media(max-width:1200px){
+.two{grid-template-columns:1fr;}
+.three{grid-template-columns:1fr;}
+.stkh{grid-template-columns:1fr;}
+.gauge-row{grid-template-columns:1fr;}
+.mgrid{grid-template-columns:repeat(2,1fr);}
+.flow-steps{grid-template-columns:repeat(2,1fr);}
+.flow-step::after{display:none;}
+.pred-grid{grid-template-columns:repeat(2,1fr);}
+.dual{grid-template-columns:1fr;}
+.wl-grid{grid-template-columns:1fr;}
+.footer-content{grid-template-columns:1fr;}
+}
+
+@media(max-width:768px){
+.nav-inner{flex-direction:column;gap:16px;}
+.nav-links{flex-wrap:wrap;justify-content:center;}
+.page{padding:32px 20px;}
+.hero{padding:32px 24px;}
+.hero h1{font-size:24px;}
+.kpi4{grid-template-columns:1fr;}
+.mini6{grid-template-columns:1fr;}
+.kpi8{grid-template-columns:repeat(2,1fr);}
+.mgrid{grid-template-columns:1fr;}
+.pred-grid{grid-template-columns:1fr;}
+.ticker{font-size:32px;}
+.price-big{font-size:40px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+<div class="nav-inner">
+<div class="nav-brand">
+<span class="pulse"></span>
+Reymen · Analytics
+</div>
+<div class="nav-links">
+<a href="#framework" class="nl">Framework</a>
+<a href="#analysis" class="nl">Analysis</a>
+<a href="#verdict" class="nl">Verdict</a>
+<a href="#" class="nl" onclick="exportReport(event)">Export</a>
+</div>
+</div>
+</nav>
+
+<div class="page">
+
+<!-- ============================================ -->
+<!-- PAGE 01: HIGH PROBABILITY SWING FRAMEWORK -->
+<!-- ============================================ -->
+
+<section id="framework">
+
+<div class="hero">
+<div class="slbl">Trading Philosophy</div>
+<h1>Consistency Beats Home Runs</h1>
+<p>We prioritize repeatable +3–7% gains over chasing oversized profits. This framework targets high-probability setups with controlled downside and professional execution.</p>
+</div>
+
+<div class="kpi4">
+<div class="card">
+<div class="slbl">Target Win Rate</div>
+<div class="val">55–65%</div>
+</div>
+<div class="card">
+<div class="slbl">Average Gain Goal</div>
+<div class="val">+3–7%</div>
+</div>
+<div class="card">
+<div class="slbl">Risk Style</div>
+<div class="val valt">Controlled</div>
+</div>
+<div class="card">
+<div class="slbl">Trading Style</div>
+<div class="val valt">Swing</div>
+</div>
+</div>
+
+<div class="chk-card">
+<div class="card">
+<h2>A+ Setup Requirements</h2>
+<p class="slbl" style="margin-top:12px;margin-bottom:20px;">Only A+ setups qualify.</p>
+<ul class="chk-list">
+<li>Uptrend / bullish trend confirmed</li>
+<li>Clear catalyst (earnings, guidance, sector momentum)</li>
+<li>Strong sector momentum</li>
+<li>No FOMO entries — wait for pullback or consolidation</li>
+<li>Logical stop placement</li>
+<li>Defined profit target</li>
+</ul>
+<p style="margin-top:20px;color:var(--dim);font-size:14px;">If multiple criteria are missing, the trade is likely lower probability.</p>
+</div>
+</div>
+
+<div class="flow-card">
+<div class="card">
+<h2>Preferred Entry Model</h2>
+<p class="slbl" style="margin-top:12px;margin-bottom:24px;">Pullback in Uptrend Framework</p>
+<div class="flow-steps">
+<div class="flow-step">
+<div class="num">01</div>
+<div class="lbl">Strong Stock</div>
+</div>
+<div class="flow-step">
+<div class="num">02</div>
+<div class="lbl">Corrects / Pulls Back</div>
+</div>
+<div class="flow-step">
+<div class="num">03</div>
+<div class="lbl">Finds Support</div>
+</div>
+<div class="flow-step">
+<div class="num">04</div>
+<div class="lbl">Resumes Trend</div>
+</div>
+</div>
+<p style="margin-top:24px;color:var(--dim);font-size:14px;">We favor pullbacks inside confirmed uptrends rather than chasing vertical price action.</p>
+</div>
+</div>
+
+<div class="avoid-card">
+<div class="card">
+<h2>What We Avoid</h2>
+<p class="slbl" style="margin-top:12px;margin-bottom:20px;">Do NOT trade</p>
+<ul class="avoid-list">
+<li>Falling knives</li>
+<li>"It looks cheap" plays</li>
+<li>Unconfirmed turnarounds</li>
+<li>Emotional / FOMO buying</li>
+<li>Weak sectors</li>
+</ul>
+<p style="margin-top:20px;color:var(--red);font-size:14px;"><strong>Caution:</strong> Low quality entries reduce win rate and increase emotional decision making.</p>
+</div>
+</div>
+
+<div class="tgt-card">
+<div class="card">
+<h2>Profit Management</h2>
+<p class="slbl" style="margin-top:12px;margin-bottom:20px;">Conservative Profit Expectations</p>
+<p style="color:var(--dim);margin-bottom:24px;">We use conservative profit expectations. Target framework:</p>
+<div class="tgt-bars">
+<div class="tgt-bar">
+<div class="lbl">
+<span>+3–5%: High probability / repeatable</span>
+<span style="color:var(--green);">Target Zone 1</span>
+</div>
+<div class="bar">
+<div class="fill" style="width:60%;background:var(--green);"></div>
+</div>
+</div>
+<div class="tgt-bar">
+<div class="lbl">
+<span>+5–7%: Strong swing outcome</span>
+<span style="color:var(--amb);">Target Zone 2</span>
+</div>
+<div class="bar">
+<div class="fill" style="width:85%;background:var(--amb);"></div>
+</div>
+</div>
+<div class="tgt-bar">
+<div class="lbl">
+<span>10%+: Bonus, not expectation</span>
+<span style="color:var(--blu);">Stretch Target</span>
+</div>
+<div class="bar">
+<div class="fill" style="width:40%;background:var(--blu);"></div>
+</div>
+</div>
+</div>
+<p style="margin-top:24px;color:var(--dim);font-size:14px;"><strong style="color:var(--txt);">Emphasis:</strong> We prefer repeatable outcomes over maximizing every trade.</p>
+</div>
+</div>
+
+<div class="final">
+<h2>System Objective</h2>
+<p>The goal is not to predict every winner. The goal is to operate a repeatable framework capable of producing 55–65% win rate with +3–7% average gains.</p>
+<div class="rating-bar">
+WIN RATE FOCUS: <span>HIGH</span>
+</div>
+</div>
+
+</section>
+
+<div class="pdiv">
+<div class="pdiv-pill">PAGE 02 · STOCK ANALYSIS</div>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE 02: PRIMARY STOCK RISK SCORE DASHBOARD -->
+<!-- ============================================ -->
+
+<section id="analysis">
+
+<div class="stkh">
+<div>
+<div class="ticker">NVDA</div>
+<div class="comp">NVIDIA Corporation</div>
+<div class="slbl">AI Infrastructure Leader</div>
+<div class="rating-pill">Strong Buy Watchlist</div>
+</div>
+<div>
+<div class="price-big">$204.04</div>
+<div class="day-range">Day Range: $204.01 - $216.25</div>
+<div style="margin-top:16px;font-size:13px;color:var(--muted);font-family:var(--mono);">
+Market Cap: $5.05T<br>
+52W Range: $140.85 - $236.54<br>
+Data: June 8, 2026
+</div>
+</div>
+</div>
+
+<div class="mini6">
+<div class="card">
+<div class="slbl">P/E Ratio</div>
+<div class="val" style="color:var(--txt);">31.41</div>
+</div>
+<div class="card">
+<div class="slbl">Dividend Yield</div>
+<div class="val" style="color:var(--green);">2.0%</div>
+</div>
+<div class="card">
+<div class="slbl">YTD Return</div>
+<div class="val" style="color:var(--green);">+44.7%</div>
+</div>
+<div class="card">
+<div class="slbl">Avg Volume</div>
+<div class="val" style="color:var(--txt);">191M</div>
+</div>
+<div class="card">
+<div class="slbl">Trade Bias</div>
+<div class="val" style="color:var(--green);">BUY PULLBACK</div>
+</div>
+<div class="card">
+<div class="slbl">Sector</div>
+<div class="val" style="color:var(--txt);">Semiconductors</div>
+</div>
+</div>
+
+<div class="gauge-row">
+<div class="gauge-card">
+<div class="slbl">Risk / Opportunity Score</div>
+<svg class="gauge-svg" viewBox="0 0 340 200">
+<defs>
+<linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" style="stop-color:#ff4060;stop-opacity:1" />
+<stop offset="50%" style="stop-color:#ffb830;stop-opacity:1" />
+<stop offset="100%" style="stop-color:#00e5a0;stop-opacity:1" />
+</linearGradient>
+</defs>
+<path d="M 30,170 A 140,140 0 0,1 310,170" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="28" stroke-linecap="round"/>
+<path d="M 30,170 A 140,140 0 0,1 255,70" fill="none" stroke="url(#gaugeGrad)" stroke-width="28" stroke-linecap="round"/>
+<circle cx="255" cy="70" r="8" fill="#00e5a0">
+<animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+</circle>
+<text x="170" y="195" text-anchor="middle" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">0</text>
+<text x="30" y="175" text-anchor="middle" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">HIGH RISK</text>
+<text x="310" y="175" text-anchor="middle" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">LOW RISK</text>
+<text x="170" y="50" text-anchor="middle" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">100</text>
+</svg>
+<div class="score-num">78</div>
+<div class="score-lbl">A+ Setup if Pullback Holds</div>
+</div>
+<div class="risk-side">
+<h3>Risk Score Interpretation</h3>
+<p>NVIDIA scores 78/100 on our risk/opportunity framework. The stock has pulled back ~14% from its May 2026 all-time high of $235.47, creating a textbook pullback-in-uptrend setup.</p>
+<p style="margin-top:12px;">Key factors: Record Q1 FY27 earnings ($81.6B revenue, +85% YoY), strong Q2 guidance ($91B), and analyst consensus price target of $311 (+53% upside). The pullback to $204 places the stock near technical support levels with RSI cooling from overbought territory.</p>
+<p style="margin-top:12px;"><strong style="color:var(--green);">Trade Recommendation:</strong> This is NOT a chase. Wait for consolidation above $200-205 support or a clear reversal signal. Entry on weakness into support offers better risk/reward than buying the current level blindly.</p>
+</div>
+</div>
+
+<div class="kpi8">
+<div class="card">
+<div class="slbl">Entry Now?</div>
+<div class="val" style="color:var(--amb);">PARTIAL</div>
+</div>
+<div class="card">
+<div class="slbl">Ideal Buy Zone</div>
+<div class="val" style="color:var(--txt);">$200-210</div>
+</div>
+<div class="card">
+<div class="slbl">Stop-Loss Zone</div>
+<div class="val" style="color:var(--red);">$195</div>
+</div>
+<div class="card">
+<div class="slbl">Profit Target</div>
+<div class="val" style="color:var(--green);">$215-225</div>
+</div>
+<div class="card">
+<div class="slbl">Expected Gain</div>
+<div class="val" style="color:var(--green);">+5-10%</div>
+</div>
+<div class="card">
+<div class="slbl">Risk/Reward</div>
+<div class="val" style="color:var(--green);">1:3</div>
+</div>
+<div class="card">
+<div class="slbl">Hold Window</div>
+<div class="val" style="color:var(--txt);">5-15 days</div>
+</div>
+<div class="card">
+<div class="slbl">Setup Quality</div>
+<div class="val" style="color:var(--green);">A+</div>
+</div>
+</div>
+
+<div class="chart-card">
+<div class="card">
+<h2>12-Month Price Chart</h2>
+<div class="slbl" style="margin-top:12px;margin-bottom:20px;">NVDA Historical Performance with Key Events</div>
+<svg viewBox="0 0 1200 360" style="width:100%;height:360px;">
+<defs>
+<linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:#00e5a0;stop-opacity:0.2" />
+<stop offset="100%" style="stop-color:#00e5a0;stop-opacity:0" />
+</linearGradient>
+</defs>
+<rect width="1200" height="360" fill="#0c0e18"/>
+<text x="20" y="30" font-size="12" fill="#5a6175" font-family="'JetBrains Mono',monospace">$240</text>
+<text x="20" y="100" font-size="12" fill="#5a6175" font-family="'JetBrains Mono',monospace">$220</text>
+<text x="20" y="170" font-size="12" fill="#5a6175" font-family="'JetBrains Mono',monospace">$200</text>
+<text x="20" y="240" font-size="12" fill="#5a6175" font-family="'JetBrains Mono',monospace">$180</text>
+<text x="20" y="310" font-size="12" fill="#5a6175" font-family="'JetBrains Mono',monospace">$160</text>
+<line x1="80" y1="0" x2="80" y2="360" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+<line x1="80" y1="170" x2="1180" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1" stroke-dasharray="4,4"/>
+<path d="M 80,290 L 180,280 L 280,250 L 380,220 L 480,190 L 580,140 L 680,80 L 780,45 L 880,60 L 980,90 L 1080,120 L 1180,160" fill="url(#chartGrad)"/>
+<path d="M 80,290 L 180,280 L 280,250 L 380,220 L 480,190 L 580,140 L 680,80 L 780,45 L 880,60 L 980,90 L 1080,120 L 1180,160" fill="none" stroke="#00e5a0" stroke-width="3"/>
+<circle cx="580" cy="140" r="6" fill="#9b6fff"/>
+<text x="585" y="130" font-size="10" fill="#9b6fff" font-family="'DM Sans',sans-serif">Q4 Earnings Beat</text>
+<circle cx="780" cy="45" r="6" fill="#00e5a0"/>
+<text x="785" y="35" font-size="10" fill="#00e5a0" font-family="'DM Sans',sans-serif">All-Time High $236</text>
+<circle cx="880" cy="60" r="6" fill="#ffb830"/>
+<text x="885" y="50" font-size="10" fill="#ffb830" font-family="'DM Sans',sans-serif">Q1 FY27 Beat</text>
+<circle cx="1080" cy="120" r="6" fill="#3d8ef8"/>
+<text x="1085" y="110" font-size="10" fill="#3d8ef8" font-family="'DM Sans',sans-serif">Pullback Zone</text>
+<circle cx="1180" cy="160" r="8" fill="#00e5a0">
+<animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/>
+</circle>
+<text x="100" y="345" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">Jun 2025</text>
+<text x="300" y="345" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">Sep 2025</text>
+<text x="500" y="345" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">Dec 2025</text>
+<text x="700" y="345" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">Mar 2026</text>
+<text x="1100" y="345" font-size="11" fill="#5a6175" font-family="'JetBrains Mono',monospace">Jun 2026</text>
+</svg>
+<p style="margin-top:16px;color:var(--dim);font-size:13px;">NVIDIA has been in a strong uptrend throughout 2025-2026. The current pullback from $236 to $204 (-13.5%) represents healthy profit-taking after a parabolic move. Technical support at $200-205 aligns with prior consolidation zones and the 20-week moving average.</p>
+</div>
+</div>
+
+<div class="mgrid">
+<div class="mcard">
+<h4>Valuation</h4>
+<div class="met">
+<span class="k">P/E Ratio</span>
+<span class="v">31.41</span>
+</div>
+<div class="met">
+<span class="k">Forward P/E</span>
+<span class="v">~25</span>
+</div>
+<div class="met">
+<span class="k">Price/Sales</span>
+<span class="v">~13x</span>
+</div>
+<div class="met">
+<span class="k">PEG Ratio</span>
+<span class="v">~0.7</span>
+</div>
+<div class="verdict">
+<strong>Beat:</strong> Valuation is reasonable relative to 85% revenue growth. Forward P/E of 25 is attractive for a company growing this fast in the AI infrastructure supercycle.
+</div>
+</div>
+
+<div class="mcard">
+<h4>Financial Health</h4>
+<div class="met">
+<span class="k">Revenue Growth (YoY)</span>
+<span class="v" style="color:var(--green);">+85%</span>
+</div>
+<div class="met">
+<span class="k">Gross Margin</span>
+<span class="v" style="color:var(--green);">74.9%</span>
+</div>
+<div class="met">
+<span class="k">Operating Income</span>
+<span class="v" style="color:var(--green);">Strong</span>
+</div>
+<div class="met">
+<span class="k">Cash Position</span>
+<span class="v" style="color:var(--green);">Excellent</span>
+</div>
+<div class="verdict">
+<strong>Beat:</strong> Exceptional financial health. Gross margins near 75% demonstrate pricing power and operational excellence. Company announced $80B share repurchase and increased dividend to $0.25/share.
+</div>
+</div>
+
+<div class="mcard">
+<h4>Revenue Growth</h4>
+<div class="met">
+<span class="k">Q1 FY27 Revenue</span>
+<span class="v" style="color:var(--green);">$81.6B</span>
+</div>
+<div class="met">
+<span class="k">YoY Growth</span>
+<span class="v" style="color:var(--green);">+85%</span>
+</div>
+<div class="met">
+<span class="k">Data Center Rev</span>
+<span class="v" style="color:var(--green);">$75.2B</span>
+</div>
+<div class="met">
+<span class="k">Q2 Guidance</span>
+<span class="v" style="color:var(--green);">$91B</span>
+</div>
+<div class="verdict">
+<strong>Beat:</strong> Revenue acceleration continues. Data center segment (92% of revenue) grew 92% YoY. Q2 guidance of $91B represents another strong sequential increase and demonstrates continued AI infrastructure demand.
+</div>
+</div>
+
+<div class="mcard">
+<h4>Earnings Quality</h4>
+<div class="met">
+<span class="k">Q1 EPS</span>
+<span class="v" style="color:var(--green);">$1.87</span>
+</div>
+<div class="met">
+<span class="k">Analyst Estimate</span>
+<span class="v">$1.78</span>
+</div>
+<div class="met">
+<span class="k">Beat</span>
+<span class="v" style="color:var(--green);">+5%</span>
+</div>
+<div class="met">
+<span class="k">EPS Growth YoY</span>
+<span class="v" style="color:var(--green);">+140%</span>
+</div>
+<div class="verdict">
+<strong>Beat:</strong> Solid earnings beat with 140% YoY EPS growth. Earnings quality is strong with operating leverage evident in margin expansion. Company consistently beats estimates.
+</div>
+</div>
+
+<div class="mcard">
+<h4>Sector / Momentum</h4>
+<div class="met">
+<span class="k">Sector</span>
+<span class="v">Semiconductors / AI</span>
+</div>
+<div class="met">
+<span class="k">Sector Trend</span>
+<span class="v" style="color:var(--green);">Strong</span>
+</div>
+<div class="met">
+<span class="k">Relative Strength</span>
+<span class="v" style="color:var(--green);">High</span>
+</div>
+<div class="met">
+<span class="k">Institutional Flow</span>
+<span class="v" style="color:var(--green);">Bullish</span>
+</div>
+<div class="verdict">
+<strong>Beat:</strong> AI infrastructure remains the strongest sector in tech. NVIDIA dominates GPU market share (~80%). Hyperscaler capex guidance for 2026 is $725B, up from prior estimates. Blackwell ramp and Vera Rubin launch create multi-year growth visibility.
+</div>
+</div>
+
+<div class="mcard">
+<h4>Execution Risk</h4>
+<div class="met">
+<span class="k">Supply Chain</span>
+<span class="v" style="color:var(--green);">Stable</span>
+</div>
+<div class="met">
+<span class="k">Competition</span>
+<span class="v" style="color:var(--amb);">Rising</span>
+</div>
+<div class="met">
+<span class="k">Valuation Risk</span>
+<span class="v" style="color:var(--amb);">Moderate</span>
+</div>
+<div class="met">
+<span class="k">Pullback Depth</span>
+<span class="v" style="color:var(--green);">Healthy</span>
+</div>
+<div class="verdict caution">
+<strong>Caution:</strong> Competition from Broadcom custom ASICs and AMD is real but not yet material. Valuation stretched on P/S but justified by growth. Current pullback is healthy and creates better entry than chasing highs.
+</div>
+</div>
+</div>
+
+<div class="score-card">
+<div class="card">
+<h2>Risk Score Breakdown</h2>
+<div class="slbl" style="margin-top:12px;margin-bottom:24px;">Weighted Framework: Catalyst 35% | Fundamentals 35% | Entry/Risk 30%</div>
+<div class="score-bars">
+<div class="score-bar">
+<div class="top">
+<div class="cat">Catalyst & Momentum (35%)</div>
+<div class="pts">32 / 35</div>
+</div>
+<div class="prog">
+<div class="fill" style="width:91%;"></div>
+</div>
+</div>
+<div class="score-bar">
+<div class="top">
+<div class="cat">Financial Quality (35%)</div>
+<div class="pts">32 / 35</div>
+</div>
+<div class="prog">
+<div class="fill" style="width:91%;"></div>
+</div>
+</div>
+<div class="score-bar">
+<div class="top">
+<div class="cat">Entry / Risk Control (30%)</div>
+<div class="pts">24 / 30</div>
+</div>
+<div class="prog">
+<div class="fill" style="width:80%;"></div>
+</div>
+</div>
+<div class="score-bar" style="margin-top:32px;padding-top:24px;border-top:1px solid var(--bdr);">
+<div class="top">
+<div class="cat" style="font-size:18px;">Total Score</div>
+<div class="pts" style="font-size:20px;color:var(--green);">78 / 100</div>
+</div>
+<div class="prog" style="height:14px;">
+<div class="fill" style="width:78%;"></div>
+</div>
+</div>
+</div>
+<p style="margin-top:24px;color:var(--dim);font-size:14px;"><strong style="color:var(--txt);">Rating:</strong> A+ Setup if Pullback Holds. This is a textbook pullback-in-uptrend scenario with strong fundamentals, clear catalysts, and a disciplined entry zone. Not a chase—wait for consolidation or a bounce from support.</p>
+</div>
+</div>
+
+</section>
+
+<div class="pdiv">
+<div class="pdiv-pill">PAGE 03 · EARNINGS, PREDICTION & VERDICT</div>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE 03: DEEP ANALYSIS, PREDICTION & VERDICT -->
+<!-- ============================================ -->
+
+<section id="verdict">
+
+<div class="earn-snap">
+<div class="card">
+<h2>Quarterly Trend Analysis</h2>
+<div class="slbl" style="margin-top:12px;margin-bottom:20px;">Recent Fiscal Quarters (NVDA Fiscal Year ends January)</div>
+<table>
+<thead>
+<tr>
+<th>Quarter</th>
+<th>Revenue</th>
+<th>YoY Growth</th>
+<th>EPS</th>
+<th>Gross Margin</th>
+<th>Trend</th>
+<th>Swing Signal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1 FY27 (Apr 2026)</td>
+<td>$81.62B</td>
+<td class="pos">+85%</td>
+<td>$1.87</td>
+<td class="pos">74.9%</td>
+<td class="pos">▲</td>
+<td class="pos">Strong Beat</td>
+</tr>
+<tr>
+<td>Q4 FY26 (Jan 2026)</td>
+<td>$68.13B</td>
+<td class="pos">+73%</td>
+<td>$1.76</td>
+<td class="pos">75.0%</td>
+<td class="pos">▲</td>
+<td class="pos">Beat</td>
+</tr>
+<tr>
+<td>Q3 FY26 (Oct 2025)</td>
+<td>$57.01B</td>
+<td class="pos">+66%</td>
+<td>$1.42</td>
+<td class="pos">73.4%</td>
+<td class="pos">▲</td>
+<td class="pos">Beat</td>
+</tr>
+<tr>
+<td>Q2 FY26 (Jul 2025)</td>
+<td>$49.88B</td>
+<td class="pos">+61%</td>
+<td>$1.18</td>
+<td class="pos">72.1%</td>
+<td class="pos">▲</td>
+<td class="pos">Beat</td>
+</tr>
+</tbody>
+</table>
+<p style="margin-top:20px;color:var(--dim);font-size:14px;"><strong style="color:var(--txt);">Swing Trading Interpretation:</strong> Four consecutive quarters of accelerating revenue growth and consistent earnings beats. Gross margins expanding despite scale. This is the type of fundamental momentum that supports swing trades on technical pullbacks. The trend is your friend until it isn't—and this trend is intact.</p>
+</div>
+</div>
+
+<div class="twrap">
+<h3>Latest Earnings Deep Dive: Q1 Fiscal 2027</h3>
+<p><strong>Report Date:</strong> May 20, 2026</p>
+<p><strong>Revenue:</strong> $81.62 billion (+85% YoY, beat consensus of $78.42B)</p>
+<p><strong>EPS:</strong> $1.87 (beat consensus of $1.78)</p>
+<p><strong>Data Center Revenue:</strong> $75.2 billion (+92% YoY), representing 92% of total revenue</p>
+<p><strong>Guidance:</strong> Q2 FY27 revenue expected at $91 billion (±2%), well above Street estimate of $86.84B</p>
+
+<p style="margin-top:16px;"><strong>Key Highlights from Management:</strong></p>
+<ul>
+<li><strong>Blackwell Ramp:</strong> CEO Jensen Huang confirmed Blackwell is in "full-scale production" across hyperscalers and system makers. Demand described as "extraordinary."</li>
+<li><strong>AI Infrastructure Buildout:</strong> Huang described current AI infrastructure expansion as "the largest infrastructure expansion in human history." Hyperscaler capex for 2026 revised up to $725B.</li>
+<li><strong>Vera Rubin Launch:</strong> NVIDIA announced Vera, a standalone data center CPU targeting the $200B data center CPU market. OpenAI, Anthropic, and SpaceX named as first customers. Samples already in customer hands.</li>
+<li><strong>Capital Returns:</strong> Board authorized $80B share repurchase program. Quarterly dividend increased 25x from $0.01 to $0.25 per share.</li>
+<li><strong>Sovereign AI:</strong> Sovereign AI spending tripled to over $30B in fiscal 2026, representing a new growth vector beyond hyperscalers.</li>
+</ul>
+
+<p style="margin-top:16px;"><strong>Why This Matters for Swing Trading:</strong></p>
+<p>This earnings report removed uncertainty and confirmed the AI infrastructure supercycle remains intact. The beat-and-raise pattern continues for the 7th consecutive quarter. Q2 guidance of $91B represents another 12% sequential increase, demonstrating that demand is not slowing.</p>
+<p style="margin-top:12px;">The pullback from $236 to $204 following this strong report is technical, not fundamental. Investors took profits after a parabolic run, and the stock is now consolidating gains. This creates a high-probability entry zone for swing traders: strong fundamentals + technical pullback + clear catalyst (Q2 likely to beat again in August) = A+ setup.</p>
+</div>
+
+<div class="pred-card">
+<div class="card">
+<h2>Price Forecast Framework</h2>
+<div class="slbl" style="margin-top:12px;margin-bottom:24px;">Base-Case Scenario (Not Guaranteed)</div>
+<p style="color:var(--dim);margin-bottom:28px;">The following predictions represent a base-case scenario derived from analyst consensus, company guidance, sector momentum, and technical analysis. These are NOT guarantees. Market conditions, sentiment, and unforeseen events can cause material deviations.</p>
+<div class="pred-grid">
+<div class="pred-item">
+<div class="tf">1 Week</div>
+<div class="cp">Current: $204</div>
+<div class="tp">$212</div>
+<div class="up">+3.9%</div>
+<svg viewBox="0 0 100 40">
+<path d="M
